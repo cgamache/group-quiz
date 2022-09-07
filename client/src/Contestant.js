@@ -1,6 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
-import Countdown from '../widgets/Countdown.js'
-import Question from '../widgets/Question.js'
+import React, { useState, useEffect } from 'react'
 import { io } from "socket.io-client"
 const socket = io()
 
@@ -124,6 +122,10 @@ function Contestant(props) {
         return p
     },[])}
     </>)
+
+    const Countdown = (props) => (<div>{ (parseInt(props.secondsRemaining) && parseInt(props.secondsRemaining) >= 0) ? `Time Remaining ${props.secondsRemaining}` : '' }</div>)
+
+    const Question = (props) => (<div>{ props.value }</div>)
 
     const InitLayout = () => {
         return (<></>)

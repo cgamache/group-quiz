@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import Countdown from '../widgets/Countdown.js'
-import Question from '../widgets/Question.js'
 import { io } from "socket.io-client"
 const socket = io()
 
@@ -96,16 +94,12 @@ function Scoreboard() {
         },{}))
     },[contestantAnswers])
 
-    const Percentage = (props) => {
-        return (<div>{percentage[props.answerId]}</div>)
-    }
+    const Percentage = (props) => (<div>{percentage[props.answerId]}</div>)
 
-    const Answer = (props) => {
-        return (<div style={props.style}>{props.answerId}. {props.value}</div>)
-    }
+    const Answer = (props) => (<div style={props.style}>{props.answerId}. {props.value}</div>)
 
-    const AnswerBlockWithPercentage  = () => {
-        return (<>
+
+    const AnswerBlockWithPercentage  = () => (<>
         {answerBlock.map(choice => {
             let s = styles.plainAnswer;
             if (answer === choice.id && frameState === 'timeout') {
@@ -113,23 +107,27 @@ function Scoreboard() {
             }
             return (<div key={choice.id}><Answer style={s} answerId={choice.id} value={choice.value} /><Percentage answerId={choice.id} /></div>)
         })}
-    </>)}
+    </>)
+
+    const Countdown = () => (<div>{ (parseInt(secondsRemaining) && parseInt(secondsRemaining) >= 0) ? `Time Remaining ${secondsRemaining}` : '' }</div>)
+
+    const Question = () => (<div>{ questionText }</div>)
 
     const ParticipantBlock = () => (<>{participants.map((p,i) => (<div key={`participant-${i}`}>{p}</div>))}</>)
 
     const InitLayout = () => (<><ParticipantBlock /></>)
 
-    const ReadyLayout = () => <><Question value={questionText} /><ParticipantBlock /></>
+    const ReadyLayout = () => <><Question /><ParticipantBlock /></>
 
     const CountdownLayout = () => (<>
-    <Countdown secondsRemaining={secondsRemaining}/>
-    <Question value={questionText} />
+    <Countdown />
+    <Question />
     <AnswerBlockWithPercentage />
     <ParticipantBlock />
     </>)
 
     const TimeoutLayout = () => (<>
-    <Question value={questionText} />
+    <Question />
     <AnswerBlockWithPercentage />
     <ParticipantBlock />
     </>)

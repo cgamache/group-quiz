@@ -176,7 +176,14 @@ function registerEvents(io) {
         }
     }
 
+    const quizGetName = (socket) => {
+        return (quizId) => {
+            socket.emit("quiz:name", quizz[quizId || 0].name)
+        }
+    }
+
     const onConnection = (socket) => {
+        socket.on("quiz:getName", quizGetName(socket))
         socket.on("question:newSession", newSession(socket))
         socket.on("question:getCurrent", currentQuestion(socket))
         socket.on("question:nextQuestion", nextQuestion(socket))

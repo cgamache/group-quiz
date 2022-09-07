@@ -1,7 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import Countdown from '../widgets/Countdown.js'
-import Question from '../widgets/Question.js'
-import AnswerBlock from '../widgets/AnswerBlock.js'
 import { io } from "socket.io-client"
 const socket = io()
 
@@ -62,6 +59,20 @@ function Host(props) {
         socket.emit('question:newSession',props.quizId)
     }
 
+    const styles = {
+        grayAnswer:{
+          opacity: "50"
+        },
+        correctAnswer:{
+            fontWeight: "bold"
+        },
+        plainAnswer:{},
+        hide: {
+            display: "none",
+            opacity: "0"
+        }
+      }
+
     const NextQuestion = () => (<button onClick={nextQuestion}>Next Question</button>)
     const NewSession = () => (<button onClick={newSession}>New Session</button>)
     const TimeoutButtons = () => {
@@ -71,7 +82,26 @@ function Host(props) {
             return (<NextQuestion />)
         }
     }
+
+    const Countdown = (props) => (<div>{ (parseInt(props.secondsRemaining) && parseInt(props.secondsRemaining) >= 0) ? `Time Remaining ${props.secondsRemaining}` : '' }</div>)
+    
+    const Question = (props) => (<div>{ props.value }</div>)
+
     const StartCountdown = () => (<button onClick={startCountdown}>Start Countdown</button>)
+
+    const Answer = (props) => (<div style={props.style}>{props.answerId}. {props.value}</div>)
+
+    const AnswerBlock  = () => {
+        return (<>
+        {answerBlock.map(choice => {
+            let s = styles.plainAnswer;
+            if (answer === choice.id && frameState === 'timeout') {
+                s = styles.correctAnswer
+            }
+            return (<div key={choice.id}><Answer style={s} answerId={choice.id} value={choice.value} /></div>)
+        })}
+    </>)}
+
 
     const InitLayout = () => (<><NewSession /></>)
 
@@ -104,17 +134,6 @@ function Host(props) {
         default:
             return (<InitLayout />)
     }    
-
- //     return (<>
-//         <button onClick={activateLasers}>
-//             Activate Lasers
-//         </button>
-//         <Countdown />
-//         <Question value={question} />
-//         <AnswerBlock value={answerBlock} answer={answer} frameState={frameState} />    
-//     </>)
 }
-// function Host () {
-//     return (<div>Hello host...</div>)
-// }
+
 export default Host

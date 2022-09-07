@@ -1,14 +1,33 @@
-import * as React from "react"
+import React, { useEffect, useState } from "react"
 import { Routes, Route, Link } from "react-router-dom"
 import "./App.css"
-import Contestant from "./Contestant/index.js"
-import Host from "./Host/index.js"
-import Scoreboard from "./Scoreboard/index.js"
+import Contestant from "./Contestant.js"
+import Host from "./Host.js"
+import Scoreboard from "./Scoreboard.js"
+import { io } from "socket.io-client"
+const socket = io()
+
 
 function App() {
+  const [quizName, setQuizName] = useState('')
+  useEffect(() => {
+    socket.on('quiz:name', (name) => {
+      setQuizName(name)
+    })
+    socket.on('connect', () => {
+      socket.emit('quiz:getName')
+    })
+
+    return () => {
+        socket.off('quiz:name')
+        socket.off('connect')
+    }
+
+  },[])
+
   return (
     <div className="App">
-      <h1>Welcome to React Router!</h1>
+      <h1>{quizName}</h1>
       <Routes>
         <Route path="/" element={<Contestant />} />
         <Route path="/scoreboard" element={<Scoreboard />} />
