@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { io } from "socket.io-client"
+import Button from 'react-bootstrap/Button'
+import Form from 'react-bootstrap/Form'
+import Stack from 'react-bootstrap/Stack'
+import Alert from 'react-bootstrap/Alert';
+
 const socket = io()
+
 
 function Contestant(props) {
     const [contestantIdInput, setContestantIdInput] = useState('')
@@ -85,64 +91,62 @@ function Contestant(props) {
         }
     }
 
-    const styles = {
-        plainAnswer:{},
-        correctAnswer:{
-            fontWeight: "bold"
-        },
-        hide: {
-            display: "none",
-            opacity: "0"
-        }
-      };
-
-    const AnswerBlockCountdown = () => (<>{answerBlock.reduce((p,c,i) => {
-            let s = styles.plainAnswer;
+    const AnswerBlockCountdown = () => (<Stack sm={12} direction="vertical" gap={3}>{answerBlock.reduce((p,c,i) => {
             if (answerSent === c.id) {
-                p.push((<div key={c.id} style={s}>Your Answer: {c.value}</div>))                    
+                p.push((<Alert key={c.id} variant='secondary'>Your Answer: {c.value}</Alert>))                    
             } else if (answerSent === '') {
-                p.push((<div key={c.id} style={s}>
-                    <button onClick={sendAnswer(c.id)}>{c.value}</button>                
-                </div>))
+                p.push((<Button key={c.id} variant='outline-primary' size='lg' onClick={sendAnswer(c.id)}>{c.value}</Button>))
             }
             return p
         },[])}
-        </>)
+        </Stack>)
 
-    const AnswerBlockTimeout = () => (<>{answerBlock.reduce((p,c,i) => {
-        let s = styles.plainAnswer;
-        if (c.id === answer) {
-            s = styles.correctAnswer
+    const AnswerBlockTimeout = () => (<Stack sm={12} direction="vertical" gap={3}>{answerBlock.reduce((p,c,i) => {
+        let v = 'secondary'
+        if (c.id === answer || (answer === '' && c.id === answerSent)) {
+            v = 'primary'
         }    
         if (answerSent === c.id) {
-            p.push((<div key={c.id} style={s}>Your Answer: {c.value}</div>))                    
+            p.push((<Alert key={c.id} variant={v}>Your Answer: {c.value}</Alert>))                    
         } else {
-            p.push((<div key={c.id} style={s}>{c.value}</div>))
+            p.push((<Alert key={c.id} variant={v}>{c.value}</Alert>))
         }
         return p
     },[])}
-    </>)
+    </Stack>)
 
-    const Countdown = (props) => (<div>{ (parseInt(props.secondsRemaining) && parseInt(props.secondsRemaining) >= 0) ? `Time Remaining ${props.secondsRemaining}` : '' }</div>)
+    const Countdown = () => { if (parseInt(secondsRemaining) && parseInt(secondsRemaining) >= 0) {
+            return (<Stack direction="vertical"><h3 className="pt-3 mx-auto">Time Remaining</h3><h1 className="pb-3 mx-auto">{secondsRemaining}</h1></Stack>)
+        }
+    }
 
-    const Question = (props) => (<div>{ props.value }</div>)
+    const Question = () => (<h2 className="my-auto mx-auto">{ questionText }</h2>)
 
     const InitLayout = () => {
         return (<></>)
     }
 
+    const Container = ({children}) => (<Stack sm={12} direction="vertical" className="w-50 mx-auto my-auto" gap={3}>{children}</Stack>)
+
+
     const ReadyLayout = () => <Question value={questionText} />
 
     const CountdownLayout = () => 
         (<>
-            <Countdown secondsRemaining={secondsRemaining} />
-            <Question value={questionText} />
+            <Question />
+            <Stack direction="vertical">
+            <Countdown />
             <AnswerBlockCountdown answerBlock={answerBlock} frameState={frameState} />
+            </Stack>
+            
         </>)
 
-    const TimeoutLayout = () => (<><Question value={questionText} />
-        <AnswerBlockTimeout answerBlock={answerBlock} frameState={frameState} answerSent={answerSent} answer={answer} />
-        </>)
+    const TimeoutLayout = () => (<>
+    <Question />
+    <Stack direction="horizontal">
+        <AnswerBlockTimeout answerBlock={answerBlock} frameState={frameState} answerSent={answerSent} answer={answer} />    
+    </Stack>
+    </>)
     
     if (contestantId === '') {
         const handleSubmit = (e) => {
@@ -154,18 +158,28 @@ function Contestant(props) {
         const handleChange = (e) => {
             setContestantIdInput(e.target.value);
         }
-        return (<form onSubmit={handleSubmit}><label>Email Address:</label><input type="text" value={contestantIdInput} onChange={handleChange} /><input type="submit" value="Submit" /></form>)
+
+        const handleEnter = (e) => {
+            if(e.key === 'Enter'){
+                handleSubmit(e)
+            }
+        }
+        return (
+            <Stack sm direction="horizontal" className="w-50 mx-auto my-auto" gap={3}>
+                <Form.Control placeholder="Email address..." value={contestantIdInput} onKeyPress={handleEnter} onChange={handleChange} />
+                <Button variant="secondary" onClick={handleSubmit} className>Submit</Button>
+            </Stack>)
     } else {
         switch (frameState) {
             case 'ready':
-                return (<ReadyLayout />)
+                return (<Container><ReadyLayout /></Container>)
             case 'countdown':
-                return (<CountdownLayout />)
+                return (<Container><CountdownLayout /></Container>)
             case 'timeout':
-                return (<TimeoutLayout />)
+                return (<Container><TimeoutLayout /></Container>)
             case 'init':
             default:
-                return (<InitLayout />)
+                return (<Container><InitLayout /></Container>)
         }    
     }
 

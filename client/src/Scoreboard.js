@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { io } from "socket.io-client"
+import Stack from 'react-bootstrap/Stack'
+import Alert from 'react-bootstrap/Alert'
+import Container from 'react-bootstrap/Container'
+import Row from 'react-bootstrap/Row'
+import Col from 'react-bootstrap/Col'
+import ProgressBar from 'react-bootstrap/ProgressBar'
+import FloatingLabel from 'react-bootstrap/FloatingLabel'
+import Gravatar from 'react-gravatar'
 const socket = io()
 
 function Scoreboard() {
@@ -55,6 +63,7 @@ function Scoreboard() {
             socket.emit('question:getCurrent')
             socket.emit('contestant:getAnswers')
             socket.emit('contestant:getParticipants')
+            socket.emit('frameState:getCurrent')
         })
         socket.on('contestant:didRegister', (participants) => {
             setParticipants(participants)
@@ -89,59 +98,72 @@ function Scoreboard() {
         },0)
         if (totalAnswers === 0) return
         setPercentage(Object.keys(contestantAnswers).reduce((p,c,i) => {
-            p[c] = ((contestantAnswers[c].length / totalAnswers) * 100).toFixed(2) + "%"
+            p[c] = ((contestantAnswers[c].length / totalAnswers) * 100).toFixed(2)
             return p
         },{}))
     },[contestantAnswers])
 
-    const Percentage = (props) => (<div>{percentage[props.answerId]}</div>)
+    const Layout = ({children}) => (<Container sm={12} fluid gap={3}>{children}</Container>)
 
-    const Answer = (props) => (<div style={props.style}>{props.answerId}. {props.value}</div>)
-
-
-    const AnswerBlockWithPercentage  = () => (<>
-        {answerBlock.map(choice => {
-            let s = styles.plainAnswer;
-            if (answer === choice.id && frameState === 'timeout') {
-                s = styles.correctAnswer
+    const AnswerBlockWithPercentage  = () => (<Stack direction="vertical" className="pt-3" gap={3}>
+        {answerBlock.map(c => {
+            let striped = false
+            if (answer === c.id && frameState === 'timeout') {
+                striped = true
             }
-            return (<div key={choice.id}><Answer style={s} answerId={choice.id} value={choice.value} /><Percentage answerId={choice.id} /></div>)
+            if (percentage[c.id] > 0) {
+                return (
+                    <FloatingLabel
+        controlId="floatingInput"
+        label={`${c.value} (${percentage[c.id] || 0}%)`}
+        className="mb-3"
+      >
+                <ProgressBar striped={striped} style={{height: '3.25em', backgroundColor: '#cfe2ff', fontSize: '1em'}} now={percentage[c.id]} key={c.id}  /></FloatingLabel>)
+            } else {
+                return (<Alert variant='primary' key={c.id}>{`${c.value} (${percentage[c.id] || 0}%)`}</Alert>)
+            }
+            
         })}
-    </>)
+    </Stack>)
 
-    const Countdown = () => (<div>{ (parseInt(secondsRemaining) && parseInt(secondsRemaining) >= 0) ? `Time Remaining ${secondsRemaining}` : '' }</div>)
+    const Countdown = () => { if (parseInt(secondsRemaining) && parseInt(secondsRemaining) >= 0) {
+            return (<Stack direction="vertical"><h3 className="pt-3 mx-auto">Time Remaining</h3><h1 className="pb-3 mx-auto">{secondsRemaining}</h1></Stack>)
+        }
+    }
 
-    const Question = () => (<div>{ questionText }</div>)
+    const Question = () => (<h2 className="my-auto mx-auto text-center">{ questionText }</h2>)
 
-    const ParticipantBlock = () => (<>{participants.map((p,i) => (<div key={`participant-${i}`}>{p}</div>))}</>)
+    const ParticipantBlock = () => (<div className="fixed-right"><Container fluid>{participants.map((p,i) => 
+        (<Gravatar key={`participant-${i}`} email={p} />)
+    )}</Container></div>)
 
     const InitLayout = () => (<><ParticipantBlock /></>)
 
-    const ReadyLayout = () => <><Question /><ParticipantBlock /></>
+    const ReadyLayout = () => <><Question /></>
 
     const CountdownLayout = () => (<>
-    <Countdown />
-    <Question />
-    <AnswerBlockWithPercentage />
-    <ParticipantBlock />
+        <Question />
+        <Stack direction="vertical">
+        <Countdown />
+        <AnswerBlockWithPercentage />
+        </Stack>
     </>)
 
     const TimeoutLayout = () => (<>
     <Question />
     <AnswerBlockWithPercentage />
-    <ParticipantBlock />
     </>)
 
     switch (frameState) {
         case 'ready':
-            return (<ReadyLayout />)
+            return (<Layout><Row><Col sm={11}><ReadyLayout /></Col><Col sm={1}><ParticipantBlock /></Col></Row></Layout>)
         case 'countdown':
-            return (<CountdownLayout />)
+            return (<Layout><Row><Col sm={11}><CountdownLayout /></Col><Col sm={1}><ParticipantBlock /></Col></Row></Layout>)
         case 'timeout':
-            return (<TimeoutLayout />)
+            return (<Layout><Row><Col sm={11}><TimeoutLayout /></Col><Col sm={1}><ParticipantBlock /></Col></Row></Layout>)
         case 'init':
         default:
-            return (<InitLayout />)
+            return (<Layout><Row><Col sm={11}><div/></Col><Col sm={1}><ParticipantBlock /></Col></Row></Layout>)
     } 
 
 }
