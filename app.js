@@ -20,10 +20,18 @@ app.use(logger('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
-app.use(express.static(path.join(__dirname, './client/build')))
 
-app.use('/', indexRouter)
-app.use('/users', usersRouter)
+const buildPath = path.normalize(path.join(__dirname, './client/build'))
+app.use(express.static(buildPath))
+
+const rootRouter = express.Router();
+/* 
+* all your other routes go here
+*/
+rootRouter.get('(/*)?', async (req, res, next) => {
+  res.sendFile(path.join(buildPath, 'index.html'));
+});
+app.use(rootRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
