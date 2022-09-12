@@ -165,8 +165,8 @@ function Contestant(props) {
             }
         }
         return (
-            <Stack sm direction="horizontal" className="w-50 mx-auto my-auto" gap={3}>
-                <Form.Control placeholder="Email address..." value={contestantIdInput} onKeyPress={handleEnter} onChange={handleChange} />
+            <Stack direction="horizontal" className="col-xl-6 col-lg-6 col-md-8 col-sm-12 mx-auto my-auto" gap={3}>
+                <Form.Control placeholder="Email address..." className="" value={contestantIdInput} onKeyPress={handleEnter} onChange={handleChange} />
                 <Button variant="secondary" onClick={handleSubmit} className>Submit</Button>
             </Stack>)
     } else {

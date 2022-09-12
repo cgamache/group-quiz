@@ -105,24 +105,16 @@ function Scoreboard() {
 
     const Layout = ({children}) => (<Container sm={12} fluid gap={3}>{children}</Container>)
 
-    const AnswerBlockWithPercentage  = () => (<Stack direction="vertical" className="pt-3" gap={3}>
+    const AnswerBlockWithPercentage  = () => (<Stack direction="vertical" className="pt-3">
         {answerBlock.map(c => {
-            let striped = false
+            let v = 'secondary'
             if (answer === c.id && frameState === 'timeout') {
-                striped = true
+                v = 'primary'
             }
-            if (percentage[c.id] > 0) {
-                return (
-                    <FloatingLabel
-        controlId="floatingInput"
-        label={`${c.value} (${percentage[c.id] || 0}%)`}
-        className="mb-3"
-      >
-                <ProgressBar striped={striped} style={{height: '3.25em', backgroundColor: '#cfe2ff', fontSize: '1em'}} now={percentage[c.id]} key={c.id}  /></FloatingLabel>)
-            } else {
-                return (<Alert variant='primary' key={c.id}>{`${c.value} (${percentage[c.id] || 0}%)`}</Alert>)
-            }
-            
+            return (<>
+            <Alert variant={v} className="mx-auto col-sm-12 col-xs-12 col-md-12 col-lg-8 text-center mb-0" key={c.id}>{`${c.value} (${percentage[c.id] || 0}%)`}</Alert>
+            <ProgressBar className="mx-auto col-sm-12 col-xs-12 col-md-12 col-lg-8 text-center mb-3" key={`progress-${c.id}`} now={percentage[c.id]}/>
+            </>)
         })}
     </Stack>)
 
