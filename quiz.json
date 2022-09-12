@@ -1,0 +1,62 @@
+[
+    {
+        "name": "Example Quiz",
+        "questions": [
+            {
+                "question": "How far did you travel to get to this meeting?",
+                "choices": [
+                    {
+                        "id": "A",
+                        "value": "I'm working from home / joining virtually"
+                    },
+                    {
+                        "id": "B",
+                        "value": "Less than 10 miles"
+                    },
+                    {
+                        "id": "C",
+                        "value": "10-50 miles"
+                    },
+                    {
+                        "id": "D",
+                        "value": "50-300 miles"
+                    },
+                    {
+                        "id": "E",
+                        "value": "300-750 miles"
+                    },
+                    {
+                        "id": "F",
+                        "value": "750+ miles"
+                    }
+
+                ],
+                "duration": 30,
+                "answer": ""
+            },
+            {
+                "question": "Which superhero is the best?",
+                "choices": [
+                    {
+                        "id": "A",
+                        "value": "Batman"
+                    },
+                    {
+                        "id": "B",
+                        "value": "Superman"
+                    },
+                    {
+                        "id": "C",
+                        "value": "Aquaman"
+                    },
+                    {
+                        "id": "D",
+                        "value": "Plasticman"
+                    }
+                ],
+                "duration": 30,
+                "answer": "B"
+            }
+        ]
+    }
+]
